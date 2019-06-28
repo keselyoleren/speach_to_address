@@ -1,0 +1,60 @@
+{% extends 'layouts/main.html' %}
+{% block content %}
+
+<div>
+    <div id='result'>
+        Your text will  appear here
+    </div>
+    <br>
+    <div id= 'record'>
+        <button onclick="startConverting()" class='btn btn-info btn-sm' id="re">record</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+    <script>
+       function startConverting() {
+            document.getElementById("re").style.visibility = "hidden";   
+            var r=document.getElementById('result');
+            var spr=new webkitSpeechRecognition();
+            spr.continuous=false; 
+            spr.interimResults=true;
+            spr.lang='en-IN'; 
+            spr.start(); 
+            var ftr='';
+            spr.onresult=function(event){
+                var interimTranscripts='';
+                for(var i=event.resultIndex;i<event.results.length;i++) {
+                    var transcript=event.results[i][0].transcript;
+                    transcript.replace("\n","<br>")
+                    if(event.results[i].isFinal){
+                        ftr+=transcript;
+                    }
+
+                    else
+                    interimTranscripts+=transcript;
+                }
+                var a = r.innerHTML=ftr +interimTranscripts ;
+                console.log(a)
+            };  
+            spr.onerror=function(event){};
+        }
+
+        $(document).ready(function() {
+            $("#send").click(function(event){
+                $.ajax({
+                    type:"POST",
+                    url:"{% url 'audio-data' %}",
+                    data: {
+                        send : $('#result').html()
+                    },
+                    success: function(){
+                        alert("Audio succesfully Submitted");
+                    }
+                });
+            });
+        });
+    </script>
+{% endblock %}
+  
